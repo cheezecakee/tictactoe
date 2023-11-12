@@ -108,7 +108,7 @@ bool is_game_over(void) {
     // If the board is full 1and no one has won, it's a draw
     return true;
 }
-
+    
 
 // Check if square is already taken
 bool is_taken(int row, int col){
@@ -126,15 +126,38 @@ void start(void){
     ai = (player == 'X') ? 'O' : 'X';
 }
 
-int main(void) {
-    // Seed random number generator with the current time
-    srand(time(NULL));
-    
-    // Assign player and AI starting pieces
-    start();
+// Reset the game board
+void reset_board(void){
+    for (int row = 1; row <= 3; row++){
+        for (int col = 1; col <= 3; col++){
+            board[row][col] = ' ';
+        }
+    }
+}
 
-    // Game loop
+// Ask user if they want to play again
+int playAgain() {
+        // Ask the user if they want to play again
+        char response;
+        printf("Do you want to play again? (y/n): ");
+        scanf(" %c", &response); // Note the 
+        getchar(); // Consume the newline character
 
+        // Reset the board if the user wants to play again
+        if (response == 'y' || response == 'Y'){
+            // reset board and other stuff here
+            // Creates the board
+            reset_board();
+            return 1;
+        }
+
+        else {
+            // Exit loop ig the user doesn't want to play again
+            return 0;
+        }
+}
+
+void playGame() {
     while (!is_game_over()){
         // Tell player which piece they starting with
         printf("Player %c's turn!\n", player);
@@ -159,7 +182,7 @@ int main(void) {
         // Get the AI's move
         struct Move ai_move = get_ai_move();
 
-        // Check if the swuare is already taken
+        // Check if the square is already taken
         if (is_taken(ai_move.row, ai_move.col)){
             continue;
         }
@@ -175,6 +198,29 @@ int main(void) {
             break;
         }
     }
+}
+
+int main(void) {
+    // Seed random number generator with the current time
+    srand(time(NULL));
+
+    // Initialize play variable
+    int play = 1;
+        
+    do {  
+        // Assign player and AI starting pieces
+        start();
+
+        // Game loop
+        playGame();
+        
+        // Display the final board
+        display_board();
+
+        // Asks user if they want to play again
+        play = playAgain();
+
+    } while(play); 
     return EXIT_SUCCESS;
 }
 
