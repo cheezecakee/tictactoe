@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 bool is_taken(int row, int col);
@@ -32,13 +33,29 @@ void display_board(){
 // Get the player's move
 struct Move get_player_move(){
     struct Move player_move;
+    char line[5]; // Size to hold the null characters
+    
     // Prompt the player for input
     printf("Enter your move (row and column, seperated by a space): ");
 
-    // Validate the input
-    while (scanf("%d %d", &player_move.row, &player_move.col) != 2 || player_move.row < 0 || player_move.row > 3 || player_move.col < 0 || player_move.col > 3 || is_taken(player_move.row, player_move.col)){
+    // Read a line of input
+    fgets(line, sizeof(line), stdin);
+
+    // Check if the input was too long
+    if (strchr(line, '\n') == NULL){
+        // Input was too long, handle error here
+        printf("Input too long. Please enter a valid move: ");
+        // Clear the input buffer
+        int c;
+        while((c = getchar()) != '\n' && c != EOF);
+        //Try to read the input again
+        fgets(line, sizeof(line), stdin);
+    }
+
+    // Parse the input
+    while (sscanf(line, "%d %d", &player_move.row, &player_move.col) != 2 || player_move.row < 0 || player_move.row > 3 || player_move.col < 0 || player_move.col > 3 || is_taken(player_move.row, player_move.col)){
         printf("Invalid move.\nPlease enter a valid move: ");
-        while(getchar() != '\n');
+        fgets(line, sizeof(line), stdin);
     }
 
     return player_move;
@@ -72,7 +89,7 @@ char player = 'X';
 char ai = 'O';
 
 // Check game state
-bool is_game_over(void) {
+bool check_winner(void) {
     // Check for a win condition
     for(int i = 1; i <= 3; i++){
         // Check rows
@@ -95,8 +112,13 @@ bool is_game_over(void) {
             return true;
         }
     }
+
+    return false;
+}
+
+bool check_draw(void){
     // Check for a draw condition(board full)
-    for(int i = 1; i < 3; i++){
+    for(int i = 1; i <= 3; i++){
         for (int j = 1; j <= 3; j++){
             if (board[i][j] == ' '){
                 // If there's an empty space, the game is not over
@@ -105,10 +127,9 @@ bool is_game_over(void) {
         }
     }
 
-    // If the board is full 1and no one has won, it's a draw
+    // If the board is full and no one has won, it's a draw
     return true;
 }
-    
 
 // Check if square is already taken
 bool is_taken(int row, int col){
@@ -158,7 +179,11 @@ int playAgain() {
 }
 
 void playGame() {
-    while (!is_game_over()){
+    bool tie = false;
+    bool playerWon = false;
+    bool aiWon = false;
+
+    while (!check_winner() && !check_draw()){
         // Tell player which piece they starting with
         printf("Player %c's turn!\n", player);
 
@@ -172,10 +197,12 @@ void playGame() {
         update_board(player, player_move);
 
         // Check game_state
-        if (is_game_over()){
-            // Display the final board and continue
-            display_board();
-            printf("Game Over. Winner: Player!\n");
+        if (check_winner()){
+            playerWon = true;
+            break;
+        }
+        if (check_draw()){
+            tie = true;
             break;
         }
 
@@ -191,14 +218,29 @@ void playGame() {
         update_board(ai, ai_move);
 
         // Check game_state
-        if (is_game_over()){
-            // Display the final board and continue
-            display_board();
-            printf("Game Over. Winner: AI!\n");
+        if (check_winner()){
+            aiWon = true;
+            break;
+        }
+        if (check_draw()){
+            tie = true;
             break;
         }
     }
+    
+    if (playerWon) {
+        printf("Game Over. Winner: Player %c!\n", player);
+        playerWon = true;
+    }
+    else if (aiWon) {
+        printf("Game Over. Winner: AI %c!\n", ai);
+        aiWon = true;
+    }
+    else if (tie) {
+        printf("Game Over. It's a tie!\n");
+    }
 }
+
 
 int main(void) {
     // Seed random number generator with the current time
