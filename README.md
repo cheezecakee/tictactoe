@@ -1,5 +1,5 @@
 # tictactoe
-Simple tic tac toe in C
+Simple tic tac toe terminal game in C
 
 # Installation
 1. Clone the zip repository to your local machine.
