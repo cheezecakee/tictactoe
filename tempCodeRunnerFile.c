@@ -1,43 +1,58 @@
-// Check game state
-bool is_game_over(void) {
-    bool win = false;
 
-    // Check for a win condition
-    for(int i = 1; i <= 3; i++){
-        // Check rows
-        if (board[i][1] == board[i][2] && board[i][2] == board[i][3]){
-            win = true;
+void playGame() {
+    char winner = ' ';
+    bool playerWon = false;
+    bool aiWon = false;
+
+    while (winner == ' '){
+        // Tell player which piece they starting with
+        printf("Player %c's turn!\n", player);
+
+        // Display the current board
+        display_board();
+
+        // Get the player's move
+        struct Move player_move = get_player_move();
+
+        // Update the board
+        update_board(player, player_move);
+
+        // Check game_state
+        winner = check_winner();
+        if (winner != ' '){
+            // Display the final board and continue
+            display_board();
             break;
         }
 
-        // Check columns
-        else if (board[1][i] == board[2][i] && board[2][i] == board[3][i]){
-            win = true;
-            break;
+        // Get the AI's move
+        struct Move ai_move = get_ai_move();
+
+        // Check if the square is already taken
+        if (is_taken(ai_move.row, ai_move.col)){
+            continue;
         }
 
-        // Check diagonal top-left to bottom-right
-        else if (board[i][i] != ' ' && board[i][i] == board[i+1][i+1] && board[i+1][i+1] == board[i+2][i+2]){
-            win = true;
-            break;
-        }
+        // Update the board with the AI's move 
+        update_board(ai, ai_move);
 
-        // Check diagonal top-right to bottom-left
-        else if (board[i+2][i] != ' ' && board[i+2][i] == board[i+1][i+1] && board[i+1][i+1] == board[i][i+2]){
-            win = true;
+        // Check game_state
+        winner = check_winner();
+        if (winner != ' '){
+            // Display the final board and continue
+            display_board();
             break;
         }
     }
-    // Check for a draw condition(board full)
-    for(int i = 1; i < 3; i++){
-        for (int j = 1; j <= 3; j++){
-            if (board[i][j] == ' '){
-                // If there's an empty space, the game is not over
-                return false;
-            }
-        }
+    
+    if (winner == player){
+        printf("Game Over. Winner: Player %c!\n", player);
+    }
+    else if (aiWon && !playerWon){
+        printf("Game Over. Winner: AI %c!\n", ai);
+    }
+    else {
+        printf("Game Over. It's a tie!\n");
     }
 
-    // If the board is full and no one has won, it's a draw
-    return true;
 }
