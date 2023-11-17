@@ -5,6 +5,7 @@ Simple tic tac toe terminal game in C
 1. Clone the zip repository to your local machine.
 2. Unzip file.
 3. Open tictactoe.exe in terminal
+4. Enjoy!!
 
 # Requirements 
 - Windows
